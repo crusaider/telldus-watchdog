@@ -1,5 +1,5 @@
 # telldus-watchdog [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
-> Node module that can watch changes in the telldus live service and emit a event when the state (anly value) of a device has changed.
+> Node module that can watch changes in the telldus live service and emit a event when the state (any value) of a device has changed.
 
 ## Installation
 
@@ -17,7 +17,7 @@ var options = {
   telldusTokenSecret: '[token secret]'
 };
 
-watchDog = twd.connect('options');
+watchDog = twd.connect(options);
 
 watchDog.on('deviceChanged', (device) => {
   console.log('Device change detected, device id: ' + device.id);
@@ -42,7 +42,7 @@ Register a event callback for a given event type.
 #### Event `'deviceChanged'`
 `function (device) {}`
 
-Emitted for every device where the watchdog detects a change in any property of the device since the last poll (or the watchdog was started). The callback will recieve a 
+Emitted for every device where the watchdog detects a change in any property of the device since the last poll (or the watchdog was started). The device object as returned from the telldus live api. 
 #### Event `'error'`
 `function (error) {}`
 
@@ -50,7 +50,7 @@ Emitted when a error is thrown from the telldus live api. The error object is su
 #### Event `'info'
 `function (info) {}`
 
-Emitted when a relevant information is available, Information passed as a string.     
+Emitted when a relevant information is available, information passed as a string.     
 ### <a name="start"></a>twd.Watchdog#start()
 Starts the polling. If this is the first time the object is started will prime it state by polling once to get the value of all devices. Any chnages to any values after this point will be emitted as change events. If a new device is added to the service this will also be emitted as a chnage event.
 ### <a name="stop"></a>twd.Watchdog#on(event, callback)  
@@ -58,7 +58,6 @@ Stops polling of the service, polling can be started again by calling the start 
 ## License
 
 MIT © [Jonas Andreasson](https://twitter.com/Crusaider)
-
 
 [npm-image]: https://badge.fury.io/js/telldus-watchdog.svg
 [npm-url]: https://npmjs.org/package/telldus-watchdog
