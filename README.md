@@ -53,8 +53,8 @@ Emitted when a error is thrown from the telldus live api. The error object is su
 Emitted when a relevant information is available, information passed as a string.     
 ### <a name="start"></a>twd.Watchdog#start()
 Starts the polling. If this is the first time the object is started will prime it state by polling once to get the value of all devices. Any chnages to any values after this point will be emitted as change events. If a new device is added to the service this will also be emitted as a chnage event.
-### <a name="stop"></a>twd.Watchdog#on(event, callback)  
-Stops polling of the service, polling can be started again by calling the start method.
+### <a name="stop"></a>twd.Watchdog#stop()  
+Stops polling, polling can be started again by calling the start method.
 ## License
 
 MIT © [Jonas Andreasson](https://twitter.com/Crusaider)
