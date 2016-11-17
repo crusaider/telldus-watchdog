@@ -1,6 +1,6 @@
 {
   "name": "telldus-watchdog",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Node module that can watch changes in the telldus live service and emit a event when the state (anly value) of a device has changed.",
   "homepage": "",
   "author": {
