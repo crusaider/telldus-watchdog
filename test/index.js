@@ -100,7 +100,25 @@ describe('telldus-wd', () => {
         });
       });
       describe('#stop', () => {
-        // TODO: Sort out how to moch the clearTimeout() call.
+        let clearTimeoutSpy;
+        before('install mocked clearTimeout', () => {
+          clearTimeoutSpy = sinon.spy(global, 'clearTimeout');
+        });
+
+        after('deinstall mock', () => {
+          clearTimeoutSpy.restore();
+        });
+
+        it('should clear the timeout', () => {
+          wd._timeOut = 1000;
+          wd.stop();
+          assert(clearTimeoutSpy.calledOnce);
+          assert(clearTimeoutSpy.calledWith(1000));
+        });
+        it('should set the run status to false', () => {
+          wd.stop();
+          assert(!wd._run);
+        });
       });
     });
 
@@ -180,50 +198,50 @@ describe('telldus-wd', () => {
 
 
           /*
-          // TODO: Fix the broken test
-          describe('using virtual time', () => {
-            var clock;
-            beforeEach('install lolex', () => {
-              clock = lolex.install();
-            });
+           // TODO: Fix the broken test
+           describe('using virtual time', () => {
+           var clock;
+           beforeEach('install lolex', () => {
+           clock = lolex.install();
+           });
 
-            afterEach('uninstall lolex', () => {
-              clock.uninstall();
-            });
+           afterEach('uninstall lolex', () => {
+           clock.uninstall();
+           });
 
-            it('should back off for a given interval and then try again', (done) => {
-              var error = {error: 'Failed'};
+           it('should back off for a given interval and then try again', (done) => {
+           var error = {error: 'Failed'};
 
-              wd._fetchDevices = sinon.spy(() => {
-                var callCount = 0;
-                return new Promise((resolve, reject) => {
-                  if (callCount === 0) {
-                    callCount++;
-                    reject(error);
-                  } else {
-                    resolve(data.twoDevices);
-                  }
-                });
-              });
+           wd._fetchDevices = sinon.spy(() => {
+           var callCount = 0;
+           return new Promise((resolve, reject) => {
+           if (callCount === 0) {
+           callCount++;
+           reject(error);
+           } else {
+           resolve(data.twoDevices);
+           }
+           });
+           });
 
-              wd._run = true;
-              wd._options.errorBackOff = 5000;
-              wd._emitInfo = sinon.spy();
-              wd._emitError = sinon.spy();
+           wd._run = true;
+           wd._options.errorBackOff = 5000;
+           wd._emitInfo = sinon.spy();
+           wd._emitError = sinon.spy();
 
-              wd._pollAndEmit = sinon.spy(() => {
-                assert(wd._fetchDevices.calledTwice);
-                assert(wd._emitInfo.calledOnce);
-                assert(wd._emitError.calledOnce);
-                assert(wd._emitError.calledWith(error));
-                done();
-              });
+           wd._pollAndEmit = sinon.spy(() => {
+           assert(wd._fetchDevices.calledTwice);
+           assert(wd._emitInfo.calledOnce);
+           assert(wd._emitError.calledOnce);
+           assert(wd._emitError.calledWith(error));
+           done();
+           });
 
-              wd._initialPoll();
-              clock.tick(wd._options.errorBackOff + 10);
-            });
-          });
-          */
+           wd._initialPoll();
+           clock.tick(wd._options.errorBackOff + 10);
+           });
+           });
+           */
         });
 
         describe('#_pollAndEmit', () => {
