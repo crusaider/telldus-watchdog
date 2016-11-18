@@ -66,15 +66,25 @@ describe('telldus-wd', () => {
     describe('public methods', () => {
       describe('#on', () => {
         it('should trigger the newListener event', (done) => {
-          var callbackSpy = sinon.spy();
+          let callbackSpy = sinon.spy();
 
           wd._emitter.on('newListener', function (name, ca) {
-            assert.equal(name, 'event');
+            assert.equal(name, 'deviceChanged');
             assert.equal(ca, callbackSpy);
             done();
           });
 
-          assert.equal(wd.on('event', callbackSpy), wd, 'did not return a reference to itself');
+          assert.equal(wd.on('deviceChanged', callbackSpy), wd, 'did not return a reference to itself');
+        });
+
+        it('should throw an error', () => {
+          let onSpy = sinon.spy(wd, 'on');
+          try {
+            wd.on('invalidEventType', undefined);
+          } catch (error) {
+          }
+
+          assert(onSpy.threw());
         });
       });
 
