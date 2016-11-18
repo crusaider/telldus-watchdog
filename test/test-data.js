@@ -1,3 +1,7 @@
+/**
+ * Copyright 2016 (C) Jonas Andreasson
+ * License: MIT
+ */
 
 module.exports.zeroDevices = {
   device: []

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2016 (C) Jonas Andreasson
+ * License: MIT
+ */
+
 'use strict';
 
 var assert = require('assert');
