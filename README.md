@@ -23,13 +23,21 @@ watchDog.on('deviceChanged', (device) => {
   console.log('Device change detected, device id: ' + device.id);
 });
 
+process.on('SIGINT', () => {
+  watchDog.stop();
+});
+
+process.on('SIGHUP', () => {
+  watchDog.stop();
+});
+
 watchDog.start();
 ```
 ## API
 * [twd.connect()](#connect)
-* [twd.on()](#on)
-* [twd.start()](#start)
-* [twd.stop()](#stop)
+* [twd.Watchdog.on()](#on)
+* [twd.Watchdog.start()](#start)
+* [twd.Watchdog.stop()](#stop)
 
 ### <a name="connect"></a>twd.connect(options)
 Creates a immutable Watchdog object to monitor the telldus live service for changes.
