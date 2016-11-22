@@ -47,6 +47,7 @@
   "dependencies": {
     "lodash": "^4.17.2",
     "querystring": "^0.2.0",
+    "telldus-live-constants": "^1.0.0",
     "telldus-live-promise": "^1.1.3"
   }
 }

@@ -36,7 +36,8 @@ describe('telldus-wd', () => {
       '../lib',
       'events',
       'lodash',
-      'querystring'
+      'querystring',
+      'telldus-live-constants'
     ]);
     mockery.registerMock('telldus-live-promise', telldusApi);
   });
