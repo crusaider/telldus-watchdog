@@ -1,24 +1,23 @@
 /**
- * Copyright 2016 (C) Jonas Andreasson
+ * Copyright 2016,2020 (C) Jonas Andreasson
  * License: MIT
  */
 
 'use strict';
 
-var assert = require('assert');
-var sinon = require('sinon');
-var lolex = require('lolex');
-var mockery = require('mockery');
+import assert, { deepEqual, equal } from 'assert';
+import { deregisterMock, disable, enable, registerAllowables, registerMock } from 'mockery';
+import { spy } from 'sinon';
+import { duplicateDevices, twoDevices, zeroDevices } from './test-data';
 
-var data = require('./test-data');
 
 describe('telldus-wd', () => {
   /**
    * Mock the telldus-live-promise API
    */
-  var requestSpy = sinon.spy(() => {
+  var requestSpy = spy(() => {
     return new Promise(function (resolve) {
-      resolve(data.twoDevices);
+      resolve(twoDevices);
     });
   });
 
@@ -31,29 +30,31 @@ describe('telldus-wd', () => {
   };
 
   beforeEach(() => {
-    mockery.enable({useCleanCache: true});
-    mockery.registerAllowables([
+    enable({useCleanCache: true});
+    registerAllowables([
       '../lib',
       'events',
       'lodash',
       'querystring',
-      'telldus-live-constants'
+      'telldus-live-constants',
+      'util'
     ]);
-    mockery.registerMock('telldus-live-promise', telldusApi);
+    registerMock('telldus-live-promise', telldusApi);
   });
 
   afterEach(() => {
-    mockery.deregisterMock('telldus-live-promise');
-    mockery.disable();
+    deregisterMock('telldus-live-promise');
+    disable();
   });
 
   describe('#connect', () => {
     it('shold return a object of class Watchdog', () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       var twd = require('../lib');
 
       var wd = twd.connect({});
 
-      assert.equal(wd.constructor.name, 'Watchdog');
+      equal(wd.constructor.name, 'Watchdog');
     });
   });
 
@@ -65,6 +66,7 @@ describe('telldus-wd', () => {
 
 
     beforeEach('connect', () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       let twd = require('../lib');
       wd = twd.connect({});
     });
@@ -72,22 +74,23 @@ describe('telldus-wd', () => {
     describe('public methods', () => {
       describe('#on', () => {
         it('should trigger the newListener event', (done) => {
-          let callbackSpy = sinon.spy();
+          let callbackSpy = spy();
 
           wd._emitter.on('newListener', function (name, ca) {
-            assert.equal(name, 'deviceChanged');
-            assert.equal(ca, callbackSpy);
+            equal(name, 'deviceChanged');
+            equal(ca, callbackSpy);
             done();
           });
 
-          assert.equal(wd.on('deviceChanged', callbackSpy), wd, 'did not return a reference to itself');
+          equal(wd.on('deviceChanged', callbackSpy), wd, 'did not return a reference to itself');
         });
 
         it('should throw an error', () => {
-          let onSpy = sinon.spy(wd, 'on');
+          let onSpy = spy(wd, 'on');
           try {
             wd.on('invalidEventType', undefined);
           } catch (error) {
+            false;
           }
 
           assert(onSpy.threw());
@@ -96,8 +99,8 @@ describe('telldus-wd', () => {
 
       describe('#start', () => {
         beforeEach('install spies', () => {
-          wd._pollAndEmit = sinon.spy();
-          wd._initialPoll = sinon.spy();
+          wd._pollAndEmit = spy();
+          wd._initialPoll = spy();
         });
 
         it('should call _initialPoll if state is unknown', () => {
@@ -118,7 +121,7 @@ describe('telldus-wd', () => {
       describe('#stop', () => {
         let clearTimeoutSpy;
         before('install mocked clearTimeout', () => {
-          clearTimeoutSpy = sinon.spy(global, 'clearTimeout');
+          clearTimeoutSpy = spy(global, 'clearTimeout');
         });
 
         after('deinstall mock', () => {
@@ -142,10 +145,12 @@ describe('telldus-wd', () => {
       describe('#_injectDefaults', () => {
         it('should set default values', () => {
           var opts = wd._injectDefaults({});
+          // eslint-disable-next-line no-prototype-builtins
           assert(opts.hasOwnProperty('pollInterval'));
-          assert.equal(opts.pollInterval, 1000 * 5);
+          equal(opts.pollInterval, 1000 * 5);
+          // eslint-disable-next-line no-prototype-builtins
           assert(opts.hasOwnProperty('errorBackOff'));
-          assert.equal(opts.errorBackOff, 1000 * 60 * 3);
+          equal(opts.errorBackOff, 1000 * 60 * 3);
         });
       });
 
@@ -155,7 +160,7 @@ describe('telldus-wd', () => {
             var emittedDevice = {};
 
             wd.on('deviceChanged', function (device) {
-              assert.equal(device, emittedDevice);
+              equal(device, emittedDevice);
               done();
             });
 
@@ -168,7 +173,7 @@ describe('telldus-wd', () => {
             var emittedError = {};
 
             wd.on('error', function (error) {
-              assert.equal(error, emittedError);
+              equal(error, emittedError);
               done();
             });
 
@@ -181,7 +186,7 @@ describe('telldus-wd', () => {
             var emittedInfo = {};
 
             wd.on('info', function (info) {
-              assert.equal(info, emittedInfo);
+              equal(info, emittedInfo);
               done();
             });
 
@@ -193,16 +198,16 @@ describe('telldus-wd', () => {
       describe('request loop', () => {
         describe('#_initialPoll', () => {
           it('should fetch devices and start continuous poll', (done) => {
-            wd._fetchDevices = sinon.spy(() => {
+            wd._fetchDevices = spy(() => {
               return new Promise(function (resolve) {
-                resolve(data.twoDevices);
+                resolve(twoDevices);
               });
             });
 
-            wd._pollAndEmit = sinon.spy(function (interval) {
-              assert.equal(interval, wd._options.pollInterval);
+            wd._pollAndEmit = spy(function (interval) {
+              equal(interval, wd._options.pollInterval);
               assert(wd._fetchDevices.calledOnce);
-              assert.deepEqual(wd._knownStates, data.twoDevices);
+              deepEqual(wd._knownStates, twoDevices);
               done();
             });
 
@@ -267,23 +272,23 @@ describe('telldus-wd', () => {
 
       describe('#_parseDevices', () => {
         it('should emit two changed events', () => {
-          wd._emitDeviceChanged = sinon.spy();
+          wd._emitDeviceChanged = spy();
 
-          var retVal = wd._parseDevices(data.zeroDevices, data.twoDevices);
+          var retVal = wd._parseDevices(zeroDevices, twoDevices);
 
           assert(wd._emitDeviceChanged.calledTwice);
-          assert.equal(retVal, data.twoDevices);
+          equal(retVal, twoDevices);
         });
 
         it('should emit one info event', () => {
-          wd._emitDeviceChanged = sinon.spy();
-          wd._emitInfo = sinon.spy();
+          wd._emitDeviceChanged = spy();
+          wd._emitInfo = spy();
 
-          var retVal = wd._parseDevices(data.duplicateDevices, data.twoDevices);
+          var retVal = wd._parseDevices(duplicateDevices, twoDevices);
 
           assert(wd._emitDeviceChanged.calledOnce);
           assert(wd._emitInfo.calledOnce);
-          assert.equal(retVal, data.twoDevices);
+          equal(retVal, twoDevices);
         });
       });
 
@@ -291,7 +296,7 @@ describe('telldus-wd', () => {
         it('should call the request api', (done) => {
           wd._fetchDevices().then((devices) => {
             assert(requestSpy.calledOnce, 'The request function was not called once');
-            assert.deepEqual(devices, data.twoDevices);
+            deepEqual(devices, twoDevices);
             done();
           });
         });

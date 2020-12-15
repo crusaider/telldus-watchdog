@@ -1,9 +1,9 @@
 /**
- * Copyright 2016 (C) Jonas Andreasson
+ * Copyright 2016,2020 (C) Jonas Andreasson
  * License: MIT
  */
 
-var twd = require('telldus-watchdog');
+import { connect } from 'telldus-watchdog';
 
 var options = {
   telldusPublicKey: '[public key]',
@@ -12,7 +12,7 @@ var options = {
   telldusTokenSecret: '[token secret]'
 };
 
-watchDog = twd.connect(options);
+const watchDog = connect(options);
 
 watchDog.on('deviceChanged', (device) => {
   console.log('Device change detected, device id: ' + device.id);
