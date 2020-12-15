@@ -10,19 +10,9 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "*": [
-        "*",
-        "lib/*",
-        "test/*"
-      ]
-    },
+      "*": ["*", "lib/*", "test/*"]
+    }
   },
-  "exclude": [
-    "example",
-    "node_modules"
-  ],
-  "include": [
-    "./lib",
-    "./test"
-  ],
+  "exclude": ["example", "node_modules"],
+  "include": ["./lib", "./test"]
 }

@@ -6,10 +6,15 @@
 'use strict';
 
 import assert, { deepEqual, equal } from 'assert';
-import { deregisterMock, disable, enable, registerAllowables, registerMock } from 'mockery';
+import {
+  deregisterMock,
+  disable,
+  enable,
+  registerAllowables,
+  registerMock,
+} from 'mockery';
 import { spy } from 'sinon';
 import { duplicateDevices, twoDevices, zeroDevices } from './test-data';
-
 
 describe('telldus-wd', () => {
   /**
@@ -24,20 +29,20 @@ describe('telldus-wd', () => {
   var telldusApi = {
     API: () => {
       return {
-        request: requestSpy
+        request: requestSpy,
       };
-    }
+    },
   };
 
   beforeEach(() => {
-    enable({useCleanCache: true});
+    enable({ useCleanCache: true });
     registerAllowables([
       '../lib',
       'events',
       'lodash',
       'querystring',
       'telldus-live-constants',
-      'util'
+      'util',
     ]);
     registerMock('telldus-live-promise', telldusApi);
   });
@@ -64,7 +69,6 @@ describe('telldus-wd', () => {
      */
     let wd;
 
-
     beforeEach('connect', () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       let twd = require('../lib');
@@ -82,7 +86,11 @@ describe('telldus-wd', () => {
             done();
           });
 
-          equal(wd.on('deviceChanged', callbackSpy), wd, 'did not return a reference to itself');
+          equal(
+            wd.on('deviceChanged', callbackSpy),
+            wd,
+            'did not return a reference to itself'
+          );
         });
 
         it('should throw an error', () => {
@@ -217,7 +225,6 @@ describe('telldus-wd', () => {
             wd._initialPoll();
           });
 
-
           /*
            // TODO: Fix the broken test
            describe('using virtual time', () => {
@@ -295,7 +302,10 @@ describe('telldus-wd', () => {
       describe('#_fetchDevices', () => {
         it('should call the request api', (done) => {
           wd._fetchDevices().then((devices) => {
-            assert(requestSpy.calledOnce, 'The request function was not called once');
+            assert(
+              requestSpy.calledOnce,
+              'The request function was not called once'
+            );
             deepEqual(devices, twoDevices);
             done();
           });

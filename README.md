@@ -17,7 +17,7 @@ var options = {
   telldusPublicKey: '[public key]',
   telldusPrivateKey: '[private key]',
   telldusToken: '[token]',
-  telldusTokenSecret: '[token secret]'
+  telldusTokenSecret: '[token secret]',
 };
 
 const watchDog = connect(options);
