@@ -11,26 +11,26 @@ $ npm install --save telldus-watchdog
 ## Example
 
 ```js
-var twd = require("telldus-watchdog");
+import { connect } from 'telldus-watchdog';
 
 var options = {
-  telldusPublicKey: "[public key]",
-  telldusPrivateKey: "[private key]",
-  telldusToken: "[token]",
-  telldusTokenSecret: "[token secret]",
+  telldusPublicKey: '[public key]',
+  telldusPrivateKey: '[private key]',
+  telldusToken: '[token]',
+  telldusTokenSecret: '[token secret]',
 };
 
-watchDog = twd.connect(options);
+const watchDog = connect(options);
 
-watchDog.on("deviceChanged", (device) => {
-  console.log("Device change detected, device id: " + device.id);
+watchDog.on('deviceChanged', (device) => {
+  console.log('Device change detected, device id: ' + device.id);
 });
 
-process.on("SIGINT", () => {
+process.on('SIGINT', () => {
   watchDog.stop();
 });
 
-process.on("SIGHUP", () => {
+process.on('SIGHUP', () => {
   watchDog.stop();
 });
 
@@ -93,7 +93,5 @@ MIT © [Jonas Andreasson](https://twitter.com/Crusaider)
 
 [npm-image]: https://badge.fury.io/js/telldus-watchdog.svg
 [npm-url]: https://npmjs.org/package/telldus-watchdog
-[travis-image]: https://travis-ci.org/crusaider/telldus-watchdog.svg?branch=master
-[travis-url]: https://travis-ci.org/crusaider/telldus-watchdog
 [daviddm-image]: https://david-dm.org/crusaider/telldus-watchdog.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/crusaider/telldus-watchdog

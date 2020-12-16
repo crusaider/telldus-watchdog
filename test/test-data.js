@@ -1,12 +1,11 @@
 /**
- * Copyright 2016 (C) Jonas Andreasson
+ * Copyright 2016,2020 (C) Jonas Andreasson
  * License: MIT
  */
 
 module.exports.zeroDevices = {
-  device: []
+  device: [],
 };
-
 
 module.exports.twoDevices = {
   device: [
@@ -23,7 +22,7 @@ module.exports.twoDevices = {
       online: '1',
       editable: 1,
       ignored: 0,
-      devices: '1283624,1283628'
+      devices: '1283624,1283628',
     },
     {
       id: '1283624',
@@ -38,9 +37,9 @@ module.exports.twoDevices = {
       online: '1',
       editable: 1,
       ignored: 1,
-      devices: '1193618,1193622'
-    }
-  ]
+      devices: '1193618,1193622',
+    },
+  ],
 };
 
 module.exports.duplicateDevices = {
@@ -58,7 +57,7 @@ module.exports.duplicateDevices = {
       online: '1',
       editable: 1,
       ignored: 0,
-      devices: '1283624,1283628'
+      devices: '1283624,1283628',
     },
     {
       id: '1268445',
@@ -73,7 +72,7 @@ module.exports.duplicateDevices = {
       online: '1',
       editable: 1,
       ignored: 0,
-      devices: '1283624,1283628'
+      devices: '1283624,1283628',
     },
-  ]
+  ],
 };
