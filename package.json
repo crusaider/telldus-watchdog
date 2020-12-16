@@ -41,7 +41,7 @@
   },
   "repository": "crusaider/telldus-watchdog",
   "scripts": {
-    "prepublishOnly": "npm run lint && npm run test && npm run build",
+    "prepublishOnly": "npm run lint && npm run build && npm run test ",
     "test": "mocha --reporter spec ./dist/test/index.js",
     "prebuild": "npm run clean",
     "build": "tsc -p tsconfig-build.json",
