@@ -18,16 +18,16 @@ const watchDog = connect({
 
 console.log('Connected');
 
-watchDog.on('deviceChanged', (device: Device | string | unknown) => {
+watchDog.on('deviceChanged', (device: Device) => {
   console.log(`Device change detected, device id: ${(device as Device).id}`);
 });
 
-watchDog.on('info', (m: unknown) => {
-  console.log('Info: ', m);
+watchDog.on('info', (message: string) => {
+  console.log('Info: ', message);
 });
 
-watchDog.on('error', (m: unknown) => {
-  console.log('Error: ', m);
+watchDog.on('error', (error: Error) => {
+  console.log('Error: ', error);
 });
 
 process.on('SIGINT', () => {

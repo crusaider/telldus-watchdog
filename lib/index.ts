@@ -4,6 +4,8 @@ import _ from 'lodash';
 import { stringify } from 'querystring';
 import { SUPPORTED_METHODS } from 'telldus-live-constants';
 import { API } from 'telldus-live-promise';
+import TypedEmitter from 'typed-emitter';
+
 /**
  * Copyright 2016,2020 (C) Jonas Andreasson
  * License: MIT
@@ -32,8 +34,6 @@ export type WatchdogOptions = {
   readonly errorBackOff?: number;
 };
 
-type EventType = 'deviceChanged' | 'error' | 'info';
-
 /**
  * Represents a generic device as returned from telldus API.
  */
@@ -48,6 +48,17 @@ export interface Device {
 interface DevicesResponse {
   device: Device[];
 }
+
+/**
+ * Watchdog supported event types and callback signatures.
+ */
+interface WatchdogEvents {
+  deviceChanged: (d: Device) => void;
+  error: (e: Error) => void;
+  info: (i: string) => void;
+}
+
+type WatchdogEmitter = TypedEmitter<WatchdogEvents>;
 
 /**
  * Main class, a instance of this class is returned from the
@@ -70,7 +81,7 @@ class Watchdog {
   }
 
   private _options: WatchdogOptions;
-  private _emitter: EventEmitter;
+  private _emitter: WatchdogEmitter;
   private telldusApi: API;
   private _run: boolean;
   private _knownStates?: DevicesResponse;
@@ -85,17 +96,20 @@ class Watchdog {
    * @returns a reference to this making it possible to
    * chain calls
    */
-  on(name: EventType, cb: (val: Device | string | Error) => void) {
+  on<E extends keyof WatchdogEvents>(
+    event: E,
+    listener: WatchdogEvents[E]
+  ): this {
     const eventTypes = ['deviceChanged', 'error', 'info'];
 
     if (
       eventTypes.find((element) => {
-        return element === name;
+        return element === event;
       })
     ) {
-      this._emitter.on(name, cb);
+      this._emitter.on(event, listener);
     } else {
-      throw new Error('Event type ' + name + ' is not supported');
+      throw new Error('Event type ' + event + ' is not supported');
     }
     return this;
   }
