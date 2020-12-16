@@ -1,29 +1,57 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { EventEmitter } from 'events';
+import _ from 'lodash';
+import { stringify } from 'querystring';
+import { SUPPORTED_METHODS } from 'telldus-live-constants';
+import { API } from 'telldus-live-promise';
 /**
  * Copyright 2016,2020 (C) Jonas Andreasson
  * License: MIT
  */
 
-'use strict';
+/**
+ * Module entry point, returns a instance of {@link Watchdog}.
+ * @param options
+ * @returns a instance of {@link Watchdog}
+ */
+export function connect(options: WatchdogOptions): Watchdog {
+  return new Watchdog(options);
+}
 
-import EventEmitter from 'events';
-import * as _ from 'lodash';
-import { stringify } from 'querystring';
-import { SUPPORTED_METHODS } from 'telldus-live-constants';
-import { API } from 'telldus-live-promise';
+export type WatchdogOptions = {
+  // Telldus API secrets
+  readonly telldusPublicKey: string;
+  readonly telldusPrivateKey: string;
+  readonly telldusToken: string;
+  readonly telldusTokenSecret: string;
+
+  // Period of time between pools to the Telldus api, defaults to 5 s.
+  readonly pollInterval?: number;
+
+  // Period of time to back of from polls on error, defaults to 3 min.
+  readonly errorBackOff?: number;
+};
+
+type EventType = 'deviceChanged' | 'error' | 'info';
 
 /**
- * Module entry point, returns a instance of {Watchdog}.
- * @param options
- * @returns {Watchdog}
+ * Represents a generic device as returned from telldus API.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function connect(options) {
-  return new Watchdog(options);
+export interface Device {
+  readonly id: string;
+  [key: string]: any;
+}
+
+/**
+ * Return value from the API call.
+ */
+interface DevicesResponse {
+  device: Device[];
 }
 
 /**
  * Main class, a instance of this class is returned from the
- * exported 'connect' funciton.
+ * exported 'connect' function.
  *
  * Periodically polls the all devices from the telldus live service,
  * if a new device has been added or the state (any value) of the existing
@@ -31,36 +59,34 @@ export function connect(options) {
  */
 class Watchdog {
   /**
-   * @param {object} opts - options on how to connect to telldus live and
+   * @param opts - options on how to connect to telldus live and
    * with what period to poll the service for changes.
-   * The options object is expected to conntain:
-   *  telldusPublicKey
-   *  telldusPrivateKey
-   *  telldusToken
-   *  telldusTokenSecret
-   *  pollInterval (defaults to 5000 ms)
-   *  errorBackOff (defaults to 18 000 ms)
-   *
    */
-  constructor(opts) {
+  constructor(opts: WatchdogOptions) {
     this._options = this._injectDefaults(opts);
     this._emitter = new EventEmitter();
     this.telldusApi = API(this._options);
     this._run = false;
-    this._knownStates = undefined;
   }
+
+  private _options: WatchdogOptions;
+  private _emitter: EventEmitter;
+  private telldusApi: API;
+  private _run: boolean;
+  private _knownStates?: DevicesResponse;
+  private _timeOut?: NodeJS.Timeout;
 
   /**
    * Registers a event listener to the instance
    *
-   * @param {string} name - name of the event to listen to, can be
+   * @param name - name of the event to listen to, can be
    * 'deviceChanged', 'error' and 'info'
-   * @param {function} cb - callback that will be called on the event
-   * @returns {Watchdog} - a reference to this making it possible to
+   * @param  cb - callback that will be called on the event
+   * @returns a reference to this making it possible to
    * chain calls
    */
-  on(name, cb) {
-    let eventTypes = ['deviceChanged', 'error', 'info'];
+  on(name: EventType, cb: (val: Device | string | Error) => void) {
+    const eventTypes = ['deviceChanged', 'error', 'info'];
 
     if (
       eventTypes.find((element) => {
@@ -122,65 +148,60 @@ class Watchdog {
   /**
    * @returns {Promise} that completes a initial poll to the Telldus service,
    * the data from this poll will be used to determine if a change has happened.
-   * Once the initial poll is completed, thecontinuouss polling is started.
+   * Once the initial poll is completed, the continuous polling is started.
    * @private
    */
   _initialPoll() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let self = this;
-    return new Promise(() => {
-      self
-        ._fetchDevices()
+    return new Promise<DevicesResponse>(() => {
+      this._fetchDevices()
         .then((devices) => {
-          if (self._run) {
-            self._knownStates = devices;
-            return self._pollAndEmit(self._options.pollInterval);
+          if (this._run) {
+            this._knownStates = devices;
+            return this._pollAndEmit(this._options.pollInterval);
           }
         })
         .catch((error) => {
-          if (self._run) {
-            self._emitInfo(
+          if (this._run) {
+            this._emitInfo(
               'Received a error from the telldus service when priming states, ' +
                 'backing off for ' +
-                self._options.errorBackOff +
+                this._options.errorBackOff +
                 ' ms'
             );
-            self._emitError(error);
-            self._timeOut = setTimeout(() => {
-              return self._initialPoll();
-            }, self._options.errorBackOff);
+            this._emitError(error);
+            this._timeOut = setTimeout(
+              () => {
+                return this._initialPoll();
+              },
+              this._options.errorBackOff ? this._options.errorBackOff : 0
+            );
           }
         });
     });
   }
 
   /**
-   * @returns {Promise} that polls the telldus API after a time interval,
+   * @returns A promise that polls the telldus API after a time interval,
    * on successful poll a event is emitted to registered listeners if the
    * state of any devices has changed since last poll. On error, emits an
    * error event and backs off for a given time period before trying again.
    */
-  _pollAndEmit(interval) {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let self = this;
-    return new Promise(function (resolve) {
-      self._timeOut = setTimeout(function () {
-        self
-          ._fetchDevices()
-          .then(function (devices) {
-            self._knownStates = self._parseDevices(self._knownStates, devices);
-            resolve(self._pollAndEmit(self._options.pollInterval));
+  _pollAndEmit(interval = 0) {
+    return new Promise<DevicesResponse>((resolve) => {
+      this._timeOut = setTimeout(() => {
+        this._fetchDevices()
+          .then((devices) => {
+            this._knownStates = this._parseDevices(this._knownStates, devices);
+            resolve(this._pollAndEmit(this._options.pollInterval));
           })
-          .catch(function (error) {
-            self._emitInfo(
-              'Received a error from the telldus service, ' +
-                'backing off for ' +
-                self._options.errorBackOff +
-                ' ms'
+          .catch((error: unknown) => {
+            this._emitInfo(
+              `Received a error from the telldus service, backing off
+               for ${this._options.errorBackOff} ms`
             );
-            self._emitError(error);
-            self._timeOut = setTimeout(function () {
-              resolve(self._pollAndEmit(self._options.errorBackOff));
+            this._emitError(error);
+            this._timeOut = setTimeout(() => {
+              resolve(this._pollAndEmit(this._options.errorBackOff));
             }, interval);
           });
       }, interval);
@@ -207,16 +228,22 @@ class Watchdog {
    * @param newDevicesState
    * @private
    */
-  _parseDevices(knownDevicesState, newDevicesState) {
+  _parseDevices(
+    knownDevicesState: DevicesResponse | undefined,
+    newDevicesState: DevicesResponse
+  ) {
     newDevicesState.device.forEach((newState) => {
-      var oldState = knownDevicesState.device.filter((d) => {
+      if (!knownDevicesState) {
+        throw new Error('Unknown old state');
+      }
+      const oldState = knownDevicesState.device.filter((d) => {
         return d.id === newState.id;
       });
 
       if (oldState.length > 1) {
         this._emitInfo(
-          'Invalid data, duplicate device id.(id: %s)',
-          oldState[0].id
+          `Invalid data, duplicate device id.(id: %s) 
+          ${oldState[0].id}`
         );
       }
 
@@ -238,8 +265,8 @@ class Watchdog {
    * @private
    */
 
-  _fetchDevices() {
-    var queryParams = {
+  _fetchDevices(): Promise<DevicesResponse> {
+    const queryParams = {
       supportedMethods: SUPPORTED_METHODS,
       includeIgnored: 1,
     };

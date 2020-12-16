@@ -1,9 +1,6 @@
 {
-    "watch": [
-        "test",
-        "lib"
-    ],
-    "ext": ".ts,.js",
-    "ignore": [],
-    "exec": "ts-node ./test/integration-test.ts"
+  "watch": ["test", "lib"],
+  "ext": ".ts,.js",
+  "ignore": [],
+  "exec": "ts-node ./test/integration-test.ts"
 }

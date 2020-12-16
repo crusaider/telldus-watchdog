@@ -65,7 +65,7 @@ describe('telldus-wd', () => {
 
   describe('Watchdog', () => {
     /**
-     * Instanciate the object to test
+     * Instansiate the object to test
      */
     let wd;
 
