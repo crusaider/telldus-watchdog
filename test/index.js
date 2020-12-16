@@ -11,7 +11,7 @@ import {
   disable,
   enable,
   registerAllowables,
-  registerMock,
+  registerMock
 } from 'mockery';
 import { spy } from 'sinon';
 import { duplicateDevices, twoDevices, zeroDevices } from './test-data';
@@ -43,6 +43,10 @@ describe('telldus-wd', () => {
       'querystring',
       'telldus-live-constants',
       'util',
+      './connect',
+      './watchdog',
+      './device',
+      './watchdog-options'
     ]);
     registerMock('telldus-live-promise', telldusApi);
   });
