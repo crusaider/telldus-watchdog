@@ -29,7 +29,7 @@
     "eslint": "^7.15.0",
     "eslint-config-prettier": "^7.0.0",
     "lolex": "^6.0.0",
-    "mocha": "^8.2.1",
+    "mocha": "^10.1.0",
     "mockery": "^2.1.0",
     "nodemon": "^2.0.6",
     "prettier": "2.2.1",
